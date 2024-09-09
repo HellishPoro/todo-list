@@ -4,7 +4,7 @@
 	justify-content: space-evenly;
 	background: #c7d3bf;
 	padding: 10px;
-	margin: 10px 150px 10px 150px;
+	margin: 10px 350px 10px 350px;
 	cursor: pointer;
 	border-radius: 25px;
 }
@@ -34,4 +34,8 @@ input {
 	margin: 5px;
 	border-radius: 25px;
 	border: none;
+}
+
+.input {
+	accent-color: #B5C6B8;
 }

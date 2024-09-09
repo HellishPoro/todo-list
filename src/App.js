@@ -1,25 +1,27 @@
 import styles from './App.module.css'
 import { useEffect, useState } from 'react';
 import { Task } from './Task/Task'
-
+import { useDebounce } from './hoock/useDebounce';
 
 function App() {
 	const [task, setTask] = useState([])
 	const [isLoading, setIsLoading] = useState(false)
 	const [isChange, setIsChange] = useState(false)
 	const [data, setData] = useState({})
-	const [isSorted, setIsSorted] = useState(false)
 	const change = () => setIsChange(!isChange)
+	const [sortBy, setSortBy] = useState({ order: 'ack' })
+	const [searchData, setSearchData] = useState('')
+	const debouncedValue = useDebounce(searchData, 500)
 
 	useEffect(() => {
 		setIsLoading(true)
-		fetch(`http://localhost:3005/todo-list`)
+		fetch(`http://localhost:3005/todo-list?q=${debouncedValue}&_sort=text&_order=${sortBy.order}`)
 			.then((loaderDate) => loaderDate.json())
 			.then((loaderTodo) => {
 				setTask(loaderTodo)
 			})
 			.finally(() => setIsLoading(false))
-	}, [isChange])
+	}, [sortBy.order, debouncedValue, isChange])
 
 
 	const createTask = (payload) => {
@@ -33,9 +35,9 @@ function App() {
 			})
 		})
 			.then((rawResponse) => rawResponse.json())
-			.then(() => {
+			.then((data) => {
+				setTask((prevState) => [...prevState, data])
 				setData({})
-				change()
 			})
 		setIsLoading(false)
 	}
@@ -73,26 +75,10 @@ function App() {
 		}
 		setIsLoading(false)
 	}
-
-	const sorting = () => {
-		setIsSorted(!isSorted)
-		if (isSorted === false) {
-			fetch(`http://localhost:3005/todo-list?_sort=views&_order=asc`)
-				.then((response) => response.json())
-				.then((loaderDate) => {
-					setTask(loaderDate)
-					change()
-				})
-		} else {
-			fetch(`http://localhost:3005/todo-list`)
-				.then((response) => response.json())
-				.then((loaderDate) => {
-					setTask(loaderDate)
-					change()
-				})
-		}
-
+	const handleSort = () => {
+		setSortBy({ ...sortBy, order: sortBy.order === 'asc' ? 'desc' : 'asc' })
 	}
+
 
 	return (
 		<>
@@ -106,8 +92,13 @@ function App() {
 					onChange={(e) => setData({ ...data, text: e.target.value })}
 				/>
 				<button className={styles.button} onClick={() => createTask(data)}>Добавить задачу</button>
+				<input className={styles.searchData}
+					type='text'
+					value={searchData}
+					onChange={(e) => setSearchData(e.target.value)}
+				/>
 			</div>
-			<button type='submit' onClick={sorting}>{isSorted === false ? "Сортировка" : "другое имя"}</button>
+			<button type='submit' onClick={handleSort}>{sortBy.order === "asc" ? "Список по возрастанию" : "Список по убыванию"}</button>
 			<div className={styles.add}>
 				{isLoading ? <div className={styles.loader}></div> : task.map((task) => (
 					<Task

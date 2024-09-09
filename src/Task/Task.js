@@ -1,7 +1,7 @@
 import style from './Task.module.css'
 import { useState } from 'react'
 
-export const Task = ({ id, text, changeTask, deleteTask }) => {
+export const Task = ({ id, text, changeTask, deleteTask, completed }) => {
 	const [textUpdate, setTextUpdate] = useState(text)
 	const [isEdit, setIsEdit] = useState(false)
 	const handleEdit = () => setIsEdit(!isEdit)
@@ -23,13 +23,14 @@ export const Task = ({ id, text, changeTask, deleteTask }) => {
 			)}
 			{isEdit ? (
 				<>
-					<button type='submit' onClick={handleUpdateTask}>Update</button>
-					<button onClick={handleEdit}>Cancel</button>
+					<button type='submit' onClick={handleUpdateTask}>Обновить</button>
+					<button onClick={handleEdit}>Отмена</button>
 				</>
 			) : (
-				<button onClick={handleEdit}>Edit</button>
+				<button onClick={handleEdit}>Редактировать</button>
 			)}
-			<button onClick={() => deleteTask(id)}>Delete</button>
+			<input className={style.input} type='checkbox' defaultChecked={completed} />
+			<button onClick={() => deleteTask(id)}>Удалить</button>
 		</div>
 	)
 }
