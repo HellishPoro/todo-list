@@ -9,9 +9,10 @@ function App() {
 	const [isChange, setIsChange] = useState(false)
 	const [data, setData] = useState({})
 	const change = () => setIsChange(!isChange)
-	const [sortBy, setSortBy] = useState({ order: 'ack' })
+	const [sortBy, setSortBy] = useState({ order: 'asc' })
 	const [searchData, setSearchData] = useState('')
-	const debouncedValue = useDebounce(searchData, 500)
+	const debouncedValue = useDebounce(searchData, 1000)
+
 
 	useEffect(() => {
 		setIsLoading(true)
@@ -25,56 +26,25 @@ function App() {
 
 
 	const createTask = (payload) => {
-		setIsLoading(true)
+		setIsLoading(true);
 
 		fetch(`http://localhost:3005/todo-list`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json;charset=utf-8' },
+			method: "POST",
+			headers: { "Content-Type": "application/json;charset=utf-8" },
 			body: JSON.stringify({
-				...payload
-			})
+				userId: 2,
+				completed: false,
+				...payload,
+			}),
 		})
 			.then((rawResponse) => rawResponse.json())
 			.then((data) => {
 				setTask((prevState) => [...prevState, data])
 				setData({})
-			})
-		setIsLoading(false)
-	}
+			});
+		setIsLoading(false);
+	};
 
-	const changeTask = async (id, payload) => {
-		setIsLoading(true)
-		const response = await fetch('http://localhost:3005/todo-list/' + id, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json;charset=utf-8' },
-			body: JSON.stringify({
-				text: payload
-			})
-		})
-		if (response.ok) {
-			const changeTask = await response.json()
-			const copyTask = task.slice()
-			const indexTask = task.findIndex((task) => task.id === id)
-			if (indexTask) {
-				copyTask[indexTask] = changeTask
-				setTask(copyTask)
-			}
-			setIsLoading(false)
-			change()
-		}
-	}
-
-	const deleteTask = async (id) => {
-		setIsLoading(true)
-		const response = await fetch('http://localhost:3005/todo-list/' + id, {
-			method: 'DELETE'
-		})
-		if (response.ok) {
-			setTask(task.filter((task) => task.id !== id))
-			change()
-		}
-		setIsLoading(false)
-	}
 	const handleSort = () => {
 		setSortBy({ ...sortBy, order: sortBy.order === 'asc' ? 'desc' : 'asc' })
 	}
@@ -82,21 +52,24 @@ function App() {
 
 	return (
 		<>
+			<div>
+				<input className={styles.searchData}
+					name='input'
+					type='title'
+					value={searchData}
+					onChange={(e) => setSearchData(e.target.value)}
+				/>
+			</div>
 			<h1 className={styles.header}>Todo List</h1>
 			<div className={styles.createTask}>
 				<input
 					name='title'
-					type='text'
+					type='title'
 					placeholder='Ввести задачу'
-					value={data.text || ''}
-					onChange={(e) => setData({ ...data, text: e.target.value })}
+					value={data.title || ''}
+					onChange={(e) => setData({ ...data, title: e.target.value })}
 				/>
 				<button className={styles.button} onClick={() => createTask(data)}>Добавить задачу</button>
-				<input className={styles.searchData}
-					type='text'
-					value={searchData}
-					onChange={(e) => setSearchData(e.target.value)}
-				/>
 			</div>
 			<button type='submit' onClick={handleSort}>{sortBy.order === "asc" ? "Список по возрастанию" : "Список по убыванию"}</button>
 			<div className={styles.add}>
@@ -104,8 +77,6 @@ function App() {
 					<Task
 						key={task.id}
 						{...task}
-						changeTask={changeTask}
-						deleteTask={deleteTask}
 					/>
 				))}
 			</div>
