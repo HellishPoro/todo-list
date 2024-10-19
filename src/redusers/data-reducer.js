@@ -1,14 +1,20 @@
-export const initialDataState = {}
+export const initialDataState = {
+	order: "desc",
+	data: "",
+};
 
 export const dataReducer = (state = initialDataState, { type, payload }) => {
 	switch (type) {
-		case 'DATA':
+		case "SORT_BY":
 			return {
 				...state,
-				task: payload
+				order: payload,
+			};
+		case "DATA":
+			return {
+				data: payload
 			}
-
 		default:
 			return state;
 	}
-}
+};
